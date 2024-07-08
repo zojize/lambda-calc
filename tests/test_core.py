@@ -54,4 +54,9 @@ def test_all_beta_reductions():
     # alpha renaming
     e = parse('(λf.λa.λb.fab)((ab)(cd))(λabcd.abcd)')
     reduced = next(all_beta_reductions(e))
-    assert alpha_equiv(reduced, parse('(λm.λn.(((ab)(cd)))mn)(λabcd.abcd)'))
+    assert alpha_equiv(reduced, parse('(λm.λn.(ab)(cd)mn)(λabcd.abcd)'))
+
+    # alpha renaming nested
+    e = parse('(λxab.abλab.x(ab)(λab.ab))(ab)')
+    reduced = next(all_beta_reductions(e))
+    assert alpha_equiv(reduced, parse('λcd.cdλef.(ab)(ef)(λab.ab)'))

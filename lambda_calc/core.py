@@ -2,7 +2,7 @@ from typing import Generator, TypedDict, TypeAlias
 from functools import reduce
 from .ast import Var, Fun, App, LambdaExpr
 
-__all__ = ['alpha_equiv', 'substitute', 'get_env', 'curry',
+__all__ = ['alpha_equiv', 'substitute', 'get_env', 'curry', 'alpha_rename',
            'all_beta_reductions', 'is_valid_reduction', 'is_simple']
 
 # env map variable ids to itself and bounding functions
@@ -10,7 +10,7 @@ Env: TypeAlias = dict[int, tuple[Var, Fun | None]]
 
 
 def get_env(expr: LambdaExpr) -> Env:
-    """returns a mapping of variable ids to its bounding functions, in context of expr"""
+    '''returns a mapping of variable ids to its bounding functions, in context of expr'''
     env: Env = {}
 
     def get_env_helper(expr: LambdaExpr, scope: dict[str, Fun]):
@@ -30,7 +30,7 @@ def get_env(expr: LambdaExpr) -> Env:
 
 
 def curry(expr: LambdaExpr) -> LambdaExpr:
-    """desugar curried arguments in the expression"""
+    '''desugar curried arguments in the expression'''
     match expr:
         case Var():
             return expr
@@ -46,7 +46,7 @@ def curry(expr: LambdaExpr) -> LambdaExpr:
 
 
 def alpha_equiv(e1: LambdaExpr, e2: LambdaExpr) -> bool:
-    """checks if two expressions are alpha equivalent"""
+    '''checks if two expressions are alpha equivalent'''
     e1 = curry(e1)
     e2 = curry(e2)
 
@@ -85,7 +85,7 @@ def alpha_equiv(e1: LambdaExpr, e2: LambdaExpr) -> bool:
 
 
 def substitute(expr: LambdaExpr, to_replace: Var, replacement: LambdaExpr, fun: Fun, env: Env) -> LambdaExpr:
-    """substitute a variable with another expression in the given scope, assuming scope populated"""
+    '''substitute a variable with another expression in the given scope, assuming scope populated'''
     def substitute_helper(expr: LambdaExpr) -> LambdaExpr:
         match expr:
             case Var(name):
@@ -105,9 +105,10 @@ def substitute(expr: LambdaExpr, to_replace: Var, replacement: LambdaExpr, fun: 
 
 
 def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
-    """rename variables in the expression to avoid name conflicts with free variables"""
+    '''rename variables in the expression to avoid name conflicts with free variables'''
     if not free_vars:
         return expr
+
     def find_needs_renaming(expr: LambdaExpr, scope: dict[str, list[int]]) -> list[tuple[int, str]]:
         match expr:
             case Var(name):
@@ -122,7 +123,7 @@ def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
                 return find_needs_renaming(fun, scope) + find_needs_renaming(arg, scope)
     needs_renaming = find_needs_renaming(expr, {})
 
-    available_names = iter(set("abcdefghijklmnopqrstuvwxyz") - {var.name for (var, _) in env.values()})
+    available_names = iter(set('abcdefghijklmnopqrstuvwxyz') - {var.name for (var, _) in env.values()})
     def get_new_name(): return next(available_names)
 
     if not needs_renaming:
@@ -135,10 +136,11 @@ def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
                     return Var(rename_to[name])
                 return expr
             case Fun(args, body):
-                # !will error if name runs out
+                #! will error if name runs out
                 new_names = {
                     arg.name: get_new_name() for arg in args if (id(expr), arg.name) in needs_renaming
                 }
+                # no new names also means no renaming needed
                 if not new_names:
                     return expr
                 return Fun([Var(new_names.get(arg.name, arg.name)) for arg in args],
@@ -159,7 +161,6 @@ def all_beta_reductions(expr: LambdaExpr) -> Generator[LambdaExpr, None, None]:
                 to_replace, *tail = args
                 arg_env = get_env(arg)
                 arg_free_vars = {var for (var, env) in arg_env.values() if env is None}
-
                 if not tail:
                     yield substitute(body, to_replace, arg, fun, env), arg_free_vars
                 else:
@@ -180,27 +181,3 @@ def is_valid_reduction(expr: LambdaExpr, reduction: LambdaExpr) -> bool:
 
 def is_simple(expr: LambdaExpr) -> bool:
     return not any(True for _ in all_beta_reductions(expr))
-
-
-# todo: pytest
-def main():
-    from .parser import parse
-    # e1 = parse('λxyz.xyz')
-    # e2 = parse('λx.λy.λz.xyz')
-    # print(alpha_equiv(e1, e2))
-
-    e = parse('(λxf.fx)(λz.z)((λq.q)(λr.r))')
-    for reduction in all_beta_reductions(e):
-        print(reduction)
-    alpha_equiv(parse('λxy.xy'), parse('λyx.yx'))
-    # e = lambda_expr.parse('xy')
-    # print(repr(e))
-    # e = parse('λx.(λx.x)(λy.x)')
-    # print(repr(e.body.arg.body.scope))
-    # assert repr(parse('λx.λy.x')) == 'Fun([Var(\'x\')], Fun([Var(\'y\')], Var(\'x\')))'
-    # print(alpha_equiv(parse('λx.xλy.x'), parse('λe.eλf.f')))
-    # assert alpha_equiv(parse('λx.x'), parse('λy.y'))
-    # assert alpha_equiv(parse('λa.λb.abb'), parse('λb.λa.baa'))
-    # assert alpha_equiv(parse('λab.abb'), parse('λba.baa'))
-    # assert not alpha_equiv(parse('λa.λb.abb'), parse('λi.λj.jji'))
-    # assert not alpha_equiv(parse('λx.xλy.x'), parse('λe.eλf.f'))

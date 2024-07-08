@@ -14,7 +14,7 @@ class Var:
         return hash(self.name)
 
     def __repr__(self):
-        return f"Var({self.name!r})"
+        return f'Var({self.name!r})'
 
     def __str__(self):
         return self.name
@@ -29,10 +29,10 @@ class Fun:
         return hash((tuple(self.args), self.body))
 
     def __repr__(self):
-        return f"Fun([{','.join(map(repr, self.args))}],{self.body!r})"
+        return f'Fun([{','.join(map(repr, self.args))}],{self.body!r})'
 
     def __str__(self):
-        return f"(λ{''.join(map(str, self.args))}.{self.body})"
+        return f'(λ{''.join(map(str, self.args))}.{self.body})'
 
     def __call__(self, *args, **_):
         if not self.fun:
@@ -49,10 +49,10 @@ class App:
         return hash((self.fun, self.arg))
 
     def __repr__(self):
-        return f"App({self.fun!r},{self.arg!r})"
+        return f'App({self.fun!r},{self.arg!r})'
 
     def __str__(self):
-        return f"({self.fun}{self.arg})"
+        return f'({self.fun}{self.arg})'
 
 
 def compile(expr: LambdaExpr):
@@ -60,6 +60,6 @@ def compile(expr: LambdaExpr):
         case Var(name):
             return name
         case Fun(args, body):
-            return f"lambda {','.join(arg.name for arg in args)}: {compile(body)}"
+            return f'lambda {','.join(arg.name for arg in args)}: {compile(body)}'
         case App(fun, arg):
-            return f"({compile(fun)})({compile(arg)})"
+            return f'({compile(fun)})({compile(arg)})'

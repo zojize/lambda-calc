@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "lambda-calc"
+version = "0.1.0"
+description = ""
+authors = ["zojize <jizezou2@illinois.edu>"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+test = "lambda_calc.core:main"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+parsy = "^2.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+inline-snapshot = "^0.11.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -35,7 +35,7 @@ class Fun:
         return f'(λ{''.join(map(str, self.args))}.{self.body})'
 
     def __call__(self, *args, **_):
-        if not self.fun:
+        if not hasattr(self, 'fun'):
             self.fun = eval(compile(self))
         return self.fun(*args)
 

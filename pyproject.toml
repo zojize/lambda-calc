@@ -6,7 +6,7 @@ authors = ["zojize <jizezou2@illinois.edu>"]
 readme = "README.md"
 
 [tool.poetry.scripts]
-test = "lambda_calc.core:main"
+test = "pytest:main"
 
 [tool.poetry.dependencies]
 python = "^3.12"

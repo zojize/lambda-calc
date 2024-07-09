@@ -7,6 +7,7 @@ readme = "README.md"
 
 [tool.poetry.scripts]
 test = "pytest:main"
+repl = "lambda_calc.repl:main"
 
 [tool.poetry.dependencies]
 python = "^3.12"

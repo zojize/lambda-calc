@@ -46,6 +46,13 @@ def test_alpha_equiv():
     assert not alpha_equiv(parse('λx.xλy.x'), parse('λe.eλf.f'))
     assert alpha_equiv(parse('λx.xλy.x'), parse('λe.eλf.e'))
 
+    e = parse('(λx.xy(λx.x))')
+    assert alpha_equiv(e, parse('(λz.zy(λx.x))'))
+
+    e = parse('(λa.a(λa.a)(λa.b))')
+    assert alpha_equiv(e, parse('(λa.a(λa.a)(λa.b))'))
+    assert alpha_equiv(e, parse('(λa.a(λb.b)(λa.b))'))
+
 
 def test_all_beta_reductions():
     assert (list(map(str, all_beta_reductions(parse('(λxf.fx)(λz.z)((λq.q)(λr.r))'))))
@@ -60,3 +67,42 @@ def test_all_beta_reductions():
     e = parse('(λxab.abλab.x(ab)(λab.ab))(ab)')
     reduced = next(all_beta_reductions(e))
     assert alpha_equiv(reduced, parse('λcd.cdλef.(ab)(ef)(λab.ab)'))
+
+    #Another alpha renaming
+    e = parse('(λcba.cba)c(λx.x)')
+    reduced = next(all_beta_reductions(e))
+    next_reduced = next(all_beta_reductions(reduced))
+    assert alpha_equiv(reduced, parse('((λba.((cb)a))(λx.x))'))
+    assert alpha_equiv(next_reduced, parse('(λa.((c(λx.x))a))'))
+    assert alpha_equiv(next_reduced, parse('(λa.c(λx.x)a)'))
+
+    #test case
+    e = parse('(λx.λy.λz.yzx)(λx.x)(λx.λy.yx)(λy.z)')
+    reduced = next(all_beta_reductions(e))
+    reduced2 = next(all_beta_reductions(reduced))
+    reduced3 = next(all_beta_reductions(reduced2))
+    reduced4 = next(all_beta_reductions(reduced3))
+    reduced5 = next(all_beta_reductions(reduced4))
+    reduced6 = next(all_beta_reductions(reduced5))
+    assert alpha_equiv(reduced6, parse('(λy.z)'))
+
+    e = parse('(λabc.cba)c(λx.x)')
+    reduced = next(all_beta_reductions(e))
+    reduced2 = next(all_beta_reductions(reduced))
+    assert alpha_equiv(reduced2,parse('λz.z(λx.x)c'))
+
+    e = parse('(λab.a)(λcd.d)(λef.e)')
+    reduced = next(all_beta_reductions(e))
+    reduced2 = next(all_beta_reductions(reduced))
+    assert alpha_equiv(reduced2, parse('λcd.d'))
+
+if __name__ == "__main__":
+    print("Testing environment")
+    test_get_env()
+    print("Testing alpha Equivalence")
+    test_alpha_equiv()
+    print("Testing Beta Reductions")
+    test_all_beta_reductions()
+    
+    
+

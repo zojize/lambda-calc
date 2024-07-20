@@ -6,3 +6,6 @@
 ## Usage
 
 See `lambda_calc.core/parser` and `tests`
+
+### Library
+

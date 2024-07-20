@@ -1,6 +1,9 @@
 from typing import Generator, TypedDict, TypeAlias
 from functools import reduce
 from .ast import Var, Fun, App, LambdaExpr
+import string
+import logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 __all__ = ['alpha_equiv', 'substitute', 'get_env', 'curry', 'alpha_rename',
            'all_beta_reductions', 'is_valid_reduction', 'is_simple']
@@ -107,6 +110,7 @@ def substitute(expr: LambdaExpr, to_replace: Var, replacement: LambdaExpr, fun: 
 def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
     '''rename variables in the expression to avoid name conflicts with free variables'''
     if not free_vars:
+        logging.info('No alpha reduction needed: No Free Variables')
         return expr
 
     def find_needs_renaming(expr: LambdaExpr, scope: dict[str, list[int]]) -> list[tuple[int, str]]:
@@ -122,11 +126,13 @@ def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
             case App(fun, arg):
                 return find_needs_renaming(fun, scope) + find_needs_renaming(arg, scope)
     needs_renaming = find_needs_renaming(expr, {})
-
-    available_names = iter(set('abcdefghijklmnopqrstuvwxyz') - {var.name for (var, _) in env.values()})
+    #Get all chars from a to Z
+    available_names = iter(set(string.ascii_lowercase + string.ascii_uppercase) - {var.name for (var, _) in env.values()})
+    
     def get_new_name(): return next(available_names)
 
     if not needs_renaming:
+        logging.info('No alpha reduction needed: No Vars requiring renaming')
         return expr
 
     def rename_helper(expr: LambdaExpr, rename_to: dict[str, str]) -> LambdaExpr:
@@ -142,6 +148,7 @@ def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
                 }
                 # no new names also means no renaming needed
                 if not new_names:
+                    logging.info('No alpha reduction needed: No new names')
                     return expr
                 return Fun([Var(new_names.get(arg.name, arg.name)) for arg in args],
                            rename_helper(body, rename_to | new_names))

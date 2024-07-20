@@ -29,10 +29,10 @@ class Fun:
         return hash((tuple(self.args), self.body))
 
     def __repr__(self):
-        return f'Fun([{','.join(map(repr, self.args))}],{self.body!r})'
+        return f"Fun([{','.join(map(repr, self.args))}],{self.body!r})"
 
     def __str__(self):
-        return f'(λ{''.join(map(str, self.args))}.{self.body})'
+        return f"(λ{''.join(map(str, self.args))}.{self.body})"
 
     def __call__(self, *args, **_):
         if not hasattr(self, 'fun'):
@@ -60,6 +60,6 @@ def compile(expr: LambdaExpr):
         case Var(name):
             return name
         case Fun(args, body):
-            return f'lambda {','.join(arg.name for arg in args)}: {compile(body)}'
+            return f"lambda {','.join(arg.name for arg in args)}: {compile(body)}"
         case App(fun, arg):
-            return f'({compile(fun)})({compile(arg)})'
+            return f"({compile(fun)})({compile(arg)})"

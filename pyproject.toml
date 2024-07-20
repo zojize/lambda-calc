@@ -10,7 +10,7 @@ test = "pytest:main"
 repl = "lambda_calc.repl:main"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11"
 parsy = "^2.1"
 
 

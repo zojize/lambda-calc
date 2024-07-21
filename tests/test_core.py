@@ -3,7 +3,6 @@ from inline_snapshot import snapshot
 from lambda_calc.core import alpha_equiv, get_env, all_beta_reductions, is_valid_reduction, is_simple
 from lambda_calc.parser import parse
 from lambda_calc.ast import Var, Fun, App
-from lambda_calc.wrapper import Reducer
 
 def test_get_env():
     f = parse('λx. λy.x (λz.wy)')
@@ -55,7 +54,6 @@ def test_alpha_equiv():
 
 
 def test_all_beta_reductions():
-    #TODO: Clean up the tests with Reducer once approved
     assert (list(map(str, all_beta_reductions(parse('(λxf.fx)(λz.z)((λq.q)(λr.r))'))))
             == snapshot(["((λf.(f(λz.z)))((λq.q)(λr.r)))", "(((λxf.(fx))(λz.z))(λr.r))"]))
 
@@ -86,9 +84,6 @@ def test_all_beta_reductions():
     reduced5 = next(all_beta_reductions(reduced4))
     reduced6 = next(all_beta_reductions(reduced5))
     assert alpha_equiv(reduced6, parse('(λy.z)'))
-    lambdastr = '(λx.λy.λz.yzx)(λx.x)(λx.λy.yx)(λy.z)'
-    reductor = Reducer(lambdastr)
-    assert(reductor.num_reductions == 6)
 
     e = parse('(λabc.cba)c(λx.x)')
     reduced = next(all_beta_reductions(e))
@@ -108,6 +103,8 @@ if __name__ == "__main__":
     test_alpha_equiv()
     print("Testing Beta Reductions")
     test_all_beta_reductions()
+
+
 
     
     

@@ -16,9 +16,9 @@ class Reducer:
     candidatestring: prairelearn input string from candidate/student
     """
 
-    alpha_error_list = []
-    beta_error_list = []
-    general_error_list = []
+    alpha_error_list :list[str] = []
+    beta_error_list :list[str] = []
+    general_error_list :list[str] = []
 
     def __init__(self, lambdastring : str, candidatestring : str):
         self.lambdastring = lambdastring
@@ -67,7 +67,6 @@ class Reducer:
         #skip the first line since its the lambda expression
         line_num = 1
         beta_candidate_list = []
-        blah = 0
         prev_line = list_lines[0]
         for line_num in range(1, len(list_lines)):
             line = list_lines[line_num]
@@ -79,13 +78,12 @@ class Reducer:
                     reduced_line = parse(line_lambda_exp)
                 except:
                     #Line cannot be parsed
-                    self.alpha_error_list.append(f'Line {line_num} is not a valid alpha reduction')
+                    self.alpha_error_list.append(f'Line {line_num} could not be parsed')
                     prev_line = reduced_line
                     continue
                 #This is an alpha reduction step. Check if the prev line is alpha equivalent to the current line
                 check_alpha_reduc = alpha_equiv(parse(prev_line), reduced_line)
                 if not check_alpha_reduc:
-                    blah += 1
                     self.alpha_error_list.append(f'Line {line_num} is not a valid alpha reduction')
 
             elif 'b->' in line:
@@ -94,7 +92,7 @@ class Reducer:
                     reduced_line = parse(line_lambda_exp)
                 except:
                     #Line cannot be parsed
-                    self.beta_error_list.append(f'Line {line_num} is not a valid beta reduction')
+                    self.beta_error_list.append(f'Line {line_num} could not be parsed')
                     prev_line = reduced_line
                     continue
                 #check that the current reduced line is not the same as the previous line to make sure it is needed

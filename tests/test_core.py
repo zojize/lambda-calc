@@ -4,7 +4,6 @@ from lambda_calc.core import alpha_equiv, get_env, all_beta_reductions, is_valid
 from lambda_calc.parser import parse
 from lambda_calc.ast import Var, Fun, App
 
-
 def test_get_env():
     f = parse('λx. λy.x (λz.wy)')
     #          ^f  ^g    ^h
@@ -96,6 +95,7 @@ def test_all_beta_reductions():
     reduced2 = next(all_beta_reductions(reduced))
     assert alpha_equiv(reduced2, parse('λcd.d'))
 
+
 if __name__ == "__main__":
     print("Testing environment")
     test_get_env()
@@ -103,6 +103,10 @@ if __name__ == "__main__":
     test_alpha_equiv()
     print("Testing Beta Reductions")
     test_all_beta_reductions()
+    
+
+
+
     
     
 

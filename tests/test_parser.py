@@ -36,3 +36,4 @@ def test_parse_fail():
         # repeated arguments
         parse('λxx.x')
 
+

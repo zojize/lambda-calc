@@ -103,6 +103,7 @@ if __name__ == "__main__":
     test_alpha_equiv()
     print("Testing Beta Reductions")
     test_all_beta_reductions()
+    
 
 
 

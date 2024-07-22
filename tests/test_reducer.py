@@ -45,6 +45,3 @@ def test_reducer_success():
     """
     reducer3 = Reducer(lambdastring = parse_str, candidatestring = candidate_str)
     assert('Line 1 is not a valid beta reduction' in reducer3.beta_error_list)
-
-if __name__ == "__main__":
-    test_reducer_success()

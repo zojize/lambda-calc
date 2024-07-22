@@ -5,7 +5,7 @@ import string
 
 from .core import alpha_equiv, get_env, all_beta_reductions, is_valid_reduction, is_simple
 from .parser import parse
-from .ast import Var, Fun, App
+from .ast import Var, Fun, App, LambdaExpr
 
 
 class Reducer:
@@ -29,6 +29,7 @@ class Reducer:
         #Check the beta reductions
         self.check_all_beta_reducs()
 
+
     def store_all_reducs(self):
         """
         To store all the reductions
@@ -38,12 +39,31 @@ class Reducer:
         current_expr = self.expr
         while to_go:
             try:
-                curr_reduced = next(all_beta_reductions(current_expr))
-                reducs_list.append(curr_reduced)
-                current_expr = curr_reduced
-            except:
+                reduced = all_beta_reductions(current_expr)
+                curr_reduced = self.collapse_reductions(reduced)
+                if curr_reduced != []:
+                    #Skip the empty list since this is the end
+                    reducs_list.append(curr_reduced)
+                current_expr = next(all_beta_reductions(current_expr))
+            except Exception as e:
                 to_go = False
         return reducs_list
+
+    @staticmethod
+    def collapse_reductions(reductions):
+        """
+        Collapse all possible beta reductions into a list
+        """
+        reduc_list = []
+        to_add = reductions
+        while True:
+            try:
+                to_add = next(to_add)
+                reduc_list.append(to_add)
+            except Exception as e:
+                break
+        return reduc_list
+
 
     @property
     def num_reductions(self):
@@ -113,12 +133,12 @@ class Reducer:
         Check that the beta reductions are equivalent
         """
         if len(self.all_beta_reducs) != len(self.candidate_beta_reducs):
-            raise( Exception("Number of beta reductions do not match the correct answer"))
+            raise( Exception(f"Number of beta reductions do not match the correct answer. There are: {len(self.all_beta_reducs)} expected beta reduction"))
 
         for beta_num in range(len(self.all_beta_reducs)):
-            correct_beta_reduc = self.all_beta_reducs[beta_num]
+            correct_beta_reduc_list = self.all_beta_reducs[beta_num]
             line_num, candidate_beta_reduc = self.candidate_beta_reducs[beta_num]
-            check_beta_reduc = alpha_equiv(correct_beta_reduc, candidate_beta_reduc)
+            check_beta_reduc = any(alpha_equiv(correct_beta_reduc, candidate_beta_reduc) for correct_beta_reduc in correct_beta_reduc_list)
             if not check_beta_reduc:
                 self.beta_error_list.append(f'Line {line_num} is not a valid beta reduction')
         

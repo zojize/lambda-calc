@@ -55,7 +55,7 @@ def test_alpha_equiv():
 
 def test_all_beta_reductions():
     assert (list(map(str, all_beta_reductions(parse('(λxf.fx)(λz.z)((λq.q)(λr.r))'))))
-            == snapshot(["((λf.(f(λz.z)))((λq.q)(λr.r)))", "(((λxf.(fx))(λz.z))(λr.r))"]))
+            == snapshot(["((λf.fλz.z)((λq.q)(λr.r)))", "(((λxf.fx)(λz.z))(λr.r))"]))
 
     # alpha renaming
     e = parse('(λf.λa.λb.fab)((ab)(cd))(λabcd.abcd)')

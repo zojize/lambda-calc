@@ -100,6 +100,11 @@ def test_all_beta_reductions():
     reduced = next(all_beta_reductions(e))
     assert alpha_equiv(reduced, parse('((λz.(yz))z)'))
 
+    #Testing support for y'''
+    e =  parse("(λx'''.x''')(λz.yz)(z)")
+    reduced = next(all_beta_reductions(e))
+    assert alpha_equiv(reduced, parse('((λz.(yz))z)'))
+
     #Testing support for y'
     e =  parse("(λx.x)(λz'.yz')(z)")
     reduced = next(all_beta_reductions(e))

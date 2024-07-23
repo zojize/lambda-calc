@@ -66,6 +66,6 @@ def main():
                 continue
 
             expr = parse(user_input)
-            print(expr)
+            print(f'{expr:terse}')
         except Exception as e:
             print(e)

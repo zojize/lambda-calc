@@ -95,14 +95,23 @@ def test_all_beta_reductions():
     reduced2 = next(all_beta_reductions(reduced))
     assert alpha_equiv(reduced2, parse('λcd.d'))
 
+    #Testing support for y'
+    e =  parse("(λx'.x')(λz.yz)(z)")
+    reduced = next(all_beta_reductions(e))
+    assert alpha_equiv(reduced, parse('((λz.(yz))z)'))
 
-if __name__ == "__main__":
-    print("Testing environment")
-    test_get_env()
-    print("Testing alpha Equivalence")
-    test_alpha_equiv()
-    print("Testing Beta Reductions")
-    test_all_beta_reductions()
+    #Testing support for y'''
+    e =  parse("(λx'''.x''')(λz.yz)(z)")
+    reduced = next(all_beta_reductions(e))
+    assert alpha_equiv(reduced, parse('((λz.(yz))z)'))
+
+    #Testing support for y'
+    e =  parse("(λx.x)(λz'.yz')(z)")
+    reduced = next(all_beta_reductions(e))
+    assert alpha_equiv(reduced, parse("((λz'.(yz'))z)"))
+    reduced2 = next(all_beta_reductions(reduced))
+    assert alpha_equiv(reduced2, parse('yz'))
+
     
 
 

@@ -15,12 +15,11 @@ class Var:
 
     def __repr__(self):
         return f"Var({self.name!r})"
-    
+
     def __format__(self, format_spec: str) -> str:
         if format_spec != 'terse':
             return super().__format__(format_spec)
         return self.name
-            
 
     def __str__(self):
         return self.name
@@ -65,13 +64,13 @@ class App:
     def __format__(self, format_spec: str) -> str:
         if format_spec != 'terse':
             return super().__format__(format_spec)
-            
+
         match self.fun, self.arg:
             case (App(), Var()) | (App(), Fun()) | (Var(), Fun()):
                 return f"{self.fun:terse}{self.arg:terse}"
             case (App(), App()):
                 return f"{self.fun:terse}{self.arg}"
-            case (Fun(), _): 
+            case (Fun(), _):
                 return f"{self.fun}{self.arg:terse}"
             case _:
                 return f"{self.fun}{self.arg}"

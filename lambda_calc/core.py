@@ -123,8 +123,8 @@ def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
             case App(fun, arg):
                 return find_needs_renaming(fun, scope) + find_needs_renaming(arg, scope)
     needs_renaming = find_needs_renaming(expr, {})
-    #Get all chars from a to Z
-    available_names = iter(set(string.ascii_lowercase + string.ascii_uppercase) - {var.name for (var, _) in env.values()})
+    #Get all chars from a to z and from a' to z'
+    available_names = iter(set(list(string.ascii_lowercase) + [ char + "'" for char in list(string.ascii_lowercase)]) - {var.name for (var, _) in env.values()})
     
     def get_new_name(): return next(available_names)
 

@@ -10,7 +10,7 @@ def lexeme(p: Parser) -> Parser: return p << ws
 
 
 lambda_ = lexeme(regex(r'[λ\\L]')).desc('lambda')
-var = lexeme(regex(r"[a-z]")).map(Var).desc('variable')
+var = lexeme(regex(r"[a-z]\'*",)).map(Var).desc('variable')
 dot = lexeme(string('.')).desc('dot')
 lparen = lexeme(string('(')).desc('left paren')
 rparen = lexeme(string(')')).desc('right paren')

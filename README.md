@@ -9,13 +9,12 @@ See `lambda_calc.core/parser` and `tests`
 
 ### Library
 
-*`ast.py`: Contains the dataclasses `Var`, `Fun`, `App`
-*`repl.py`: A simple lambda calculus repl in the terminal
-*`parser.py`: Contains the structure for a lambda expression
-*`core.py`: Contains the functions used for alpha reduction and beta reduction
-*`wrapper.py`: Contains the function `check_candidate_str(candidatestring: str) -> List[str]:` that can be called to parse a candidate string
-The python code below shows how `check_candidate_str` can be called. Do note 
-`repl :: Env -> IO ()`
++`ast.py`: Contains the dataclasses `Var`, `Fun`, `App`
++`repl.py`: A simple lambda calculus repl in the terminal
++`parser.py`: Contains the structure for a lambda expression
++`core.py`: Contains the functions used for alpha reduction and beta reduction
++`wrapper.py`: Contains the function `check_candidate_str(candidatestring: str) -> List[str]:` that can be called to parse a candidate string
+The python code below shows how `check_candidate_str` can be called.
 ~~~python
 candidate_str = """
 (λx.x)(λz.yz)(z)\n

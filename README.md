@@ -32,7 +32,7 @@ errors = check_candidate_str(candidate_str)
 * An alpha reduction can be initiated in a starting with `a->` like in `line 2`: `a-> ((λx.yx)z)`
 * `check_candidate_str` returns a list of errors detected in the candidate string\
 
-List of Errors:
+**List of Errors:**
 + `Cannot parse initial lambda expression`: The lambda expression in `line 0` cannot be parsed
 +  `Line x could not be parsed`: The reduction in `line x` cannot be parsed
 + `Line x is not a valid alpha reduction`: The reduction in `line x` is invalid and is not alpha equivalent to `line x-1`

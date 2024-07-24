@@ -15,7 +15,7 @@ There are several files in `lambda_calc`:
 + `parser.py`: Contains the structure for a lambda expression
 + `core.py`: Contains the functions used for alpha reduction and beta reduction
 + `wrapper.py`: Contains the function `check_candidate_str(candidatestring: str) -> List[str]:` that can be called to parse a candidate string
-The python code below shows how `check_candidate_str` can be called.
+The python code below shows how `check_candidate_str` can be used:
 ~~~python
 candidate_str = """
 (λx.x)(λz.yz)(z)\n

@@ -2,13 +2,14 @@ from typing import Generator, TypedDict, TypeAlias
 from functools import reduce
 import itertools
 import string
+from typing import List
 
 from .core import alpha_equiv, get_env, all_beta_reductions, is_valid_reduction, is_simple
 from .parser import parse
 from .ast import Var, Fun, App, LambdaExpr
 
 
-def check_candidate_str(candidatestring: str):
+def check_candidate_str(candidatestring: str) -> List[str]:
     """
     Takes in the candidate string and returns a list of all possible errors
     """

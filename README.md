@@ -29,5 +29,14 @@ errors = check_candidate_str(candidate_str)
 
 * `line 0`: Contains the lambda expression to parse: `(λx.x)(λz.yz)(z)`
 * A beta reduction can be initiated in a line starting with `b ->` like in `line 1`: `b-> ((λz.yz)z)`
-* An alpha reduction can also be initiated in a starting with `a->` like in `line 2`: `a-> ((λx.yx)z)`
+* An alpha reduction can be initiated in a starting with `a->` like in `line 2`: `a-> ((λx.yx)z)`
+* `check_candidate_str` returns a list of errors detected in the candidate string\
+
+List of Errors:
++ `Cannot parse initial lambda expression`: The lambda expression in `line 0` cannot be parsed
++  `Line x could not be parsed`: The reduction in `line x` cannot be parsed
++ `Line x is not a valid alpha reduction`: The reduction in `line x` is invalid and is not alpha equivalent to `line x-1`
++ `Line x is not a valid beta reduction`: The reduction in `line x` is invalid and is not alpha equivalent to `line x-1`
+
+
 

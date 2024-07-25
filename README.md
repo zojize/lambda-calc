@@ -13,7 +13,8 @@ There are several files in `lambda_calc`:
 + `ast.py`: Contains the dataclasses `Var`, `Fun`, `App`
 + `repl.py`: A simple lambda calculus repl in the terminal
 + `parser.py`: Contains the structure for a lambda expression
-    - Note that the parser allows for `Var`s like `x`, ```x``` and even ```x`````
+    - Note that the parser allows for variables like `x`, ``x` `` and even ```x`` ```
+    - So lambda expressions like : `λx'.x'`, `λx.x` and `λx''.x''` will be accepted by the parser
 + `core.py`: Contains the functions used for alpha reduction and beta reduction
 + `wrapper.py`: Contains the function `check_candidate_str(candidatestring: str) -> List[str]:` that can be called to parse a candidate string\
 

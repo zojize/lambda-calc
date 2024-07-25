@@ -1,4 +1,4 @@
-from typing import Generator, TypedDict, TypeAlias
+from typing import Generator, Literal, TypeAlias
 from functools import reduce
 from .ast import Var, Fun, App, LambdaExpr
 import string
@@ -154,13 +154,13 @@ def alpha_rename(expr: LambdaExpr, vars_to_rename: list[tuple[int, str]], env: E
     return rename_helper(expr, {})
 
 
-def all_beta_reductions(expr: LambdaExpr) -> Generator[LambdaExpr, None, None]:
+def all_beta_reductions(expr: LambdaExpr) -> Generator[tuple[Literal["alpha"] | Literal["beta"], LambdaExpr], None, None]:
     env = get_env(expr)
 
     def all_beta_reductions_helper(expr: LambdaExpr):
         match expr:
             case Fun(args, body):
-                yield from (Fun(args, body) for body in all_beta_reductions_helper(body))
+                yield from ((t, Fun(args, body)) for t, body in all_beta_reductions_helper(body))
             case App(Fun(args, body) as fun, arg):
                 to_replace, *tail = args
                 arg_env = get_env(arg)
@@ -168,17 +168,17 @@ def all_beta_reductions(expr: LambdaExpr) -> Generator[LambdaExpr, None, None]:
                 vars_to_rename = vars_need_renaming(body, arg_free_vars, to_replace, fun, env)
                 if vars_to_rename:
                     # alpha-reduction
-                    yield App(Fun(args, alpha_rename(body, vars_to_rename, env)), arg)
+                    yield "alpha", App(Fun(args, alpha_rename(body, vars_to_rename, env)), arg)
                 elif tail:
                     # beta-reduction
-                    yield Fun(tail, substitute(body, to_replace, arg, fun, env))
+                    yield "beta", Fun(tail, substitute(body, to_replace, arg, fun, env))
                 else:
                     # beta-reduction
-                    yield substitute(body, to_replace, arg, fun, env)
-                yield from (App(fun, arg) for arg in all_beta_reductions_helper(arg))
+                    yield "beta", substitute(body, to_replace, arg, fun, env)
+                yield from ((t, App(fun, arg)) for t, arg in all_beta_reductions_helper(arg))
             case App(fun, arg):
-                yield from (App(fun, arg) for fun in all_beta_reductions_helper(fun))
-                yield from (App(fun, arg) for arg in all_beta_reductions_helper(arg))
+                yield from ((t, App(fun, arg)) for t, fun in all_beta_reductions_helper(fun))
+                yield from ((t, App(fun, arg)) for t, arg in all_beta_reductions_helper(arg))
             case _:
                 # no need to reduce variables
                 pass
@@ -186,7 +186,7 @@ def all_beta_reductions(expr: LambdaExpr) -> Generator[LambdaExpr, None, None]:
 
 
 def is_valid_reduction(expr: LambdaExpr, reduction: LambdaExpr) -> bool:
-    return any(alpha_equiv(reduction, reduced) for reduced in all_beta_reductions(expr))
+    return any(alpha_equiv(reduction, reduced) for _, reduced in all_beta_reductions(expr))
 
 
 def is_simple(expr: LambdaExpr) -> bool:

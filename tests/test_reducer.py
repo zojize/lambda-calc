@@ -9,7 +9,6 @@ from lambda_calc.wrapper import check_candidate_str
 
 def test_reducer_success():
     #Test1
-    parse_str = '(λx.x)(λz.yz)(z)'
     candidate_str1 = """
     (λx.x)(λz.yz)(z)\n
     b-> ((λz.yz)z)\n
@@ -20,7 +19,6 @@ def test_reducer_success():
     assert(len(errors1) == 0)
 
     #Test2 (Wrong alpha reduction)
-    parse_str2 = '(λx.x)(λz.yz)(z)'
     candidate_str2 = """
     (λx.x)(λz.yz)(z)\n
     b-> ((λz.yz)z)\n
@@ -31,7 +29,6 @@ def test_reducer_success():
     assert('Line 2 is not a valid alpha reduction' in errors2)
 
     #Test3 (Wrong beta reduction)
-    parse_str = '(λx.x)(λz.yz)(z)'
     candidate_str3 = """
     (λx.x)(λz.yz)(z)\n
     b-> ((λz.cz)z)\n

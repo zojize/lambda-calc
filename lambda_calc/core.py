@@ -188,9 +188,11 @@ def all_beta_reductions(expr: LambdaExpr) -> Generator[tuple[Literal["alpha"] | 
 def is_valid_reduction(expr: LambdaExpr, reduction: LambdaExpr) -> bool:
     return any(alpha_equiv(reduction, reduced) for _, reduced in all_beta_reductions(expr))
 
+
 def is_simple(expr: LambdaExpr) -> bool:
     return not any(True for _ in all_beta_reductions(expr))
 
+
 def return_reducs_only(beta_reduc: Generator) -> List[LambdaExpr]:
-    reduc_list = [reduc for (_, reduc) in list(beta_reduc)]
+    reduc_list = [reduc for (_, reduc) in beta_reduc]
     return reduc_list

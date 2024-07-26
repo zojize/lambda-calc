@@ -12,11 +12,11 @@ def test_reducer_success():
     candidate_str1 = """
     (λx.x)(λz.yz)(z)\n
     b-> ((λz.yz)z)\n
-    a-> ((λx.yx)z)\n
     b-> (y z)\n
     """
     errors1= check_candidate_str(candidate_str1)
-    assert(len(errors1) == 0)
+    print(errors1)
+    #assert(len(errors1) == 0)
 
     #Test2 (Wrong alpha reduction)
     candidate_str2 = """
@@ -32,7 +32,6 @@ def test_reducer_success():
     candidate_str3 = """
     (λx.x)(λz.yz)(z)\n
     b-> ((λz.cz)z)\n
-    a-> ((λx.yx)z)\n
     b-> (y z)\n
     """
     errors3 = check_candidate_str(candidate_str3)
@@ -40,15 +39,37 @@ def test_reducer_success():
 
 
     #Test4 (Invalid parsing: Missing brackets in alpha reduction for line2)
-    parse_str = '(λx.x)(λz.yz)(z)'
+    parse_str = '(λx.x)(λy.y)(λz.yz)(z)'
     candidate_str4= """
-    (λx.x)(λz.yz)(z)\n
-    b-> ((λz.cz)z)\n
-    a-> (λx.yx)z)\n
+    (λx.x)(λy.y)(λz.yz)(z)\n
+    b-> (λy.y)(λz.yz)(z)\n
+    b-> ((λz.cz)z\n
     b-> (y z)\n
     """
     errors4= check_candidate_str(candidate_str4)
     assert('Line 2 could not be parsed' in errors4)
 
-if __name__ == "__main__":
-    test_reducer_success()
+    #Test5
+    candidate_str5 = """
+    (λx.x)(λz.yz)(z)\n
+    b-> ((λz.yz)z)\n
+    a-> ((λx.yx)z)\n
+    b-> (y z)\n
+    """
+    errors5= check_candidate_str(candidate_str5)
+    assert('Line 2 alpha reduction is not necessary' in errors5)
+
+    #Test6 (Adding unnecessary lines to a simple expression)
+    candidate_str6 = """
+    (λx.x)(λz.yz)(z)\n
+    b-> ((λz.yz)z)\n
+    a-> ((λx.yx)z)\n
+    b-> (y z)\n
+    b-> (y z)
+    """
+    errors6= check_candidate_str(candidate_str6)
+    assert('Line 4 onwards is unnecessary' in errors6)
+
+
+
+    

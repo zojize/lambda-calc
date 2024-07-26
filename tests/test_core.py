@@ -4,6 +4,7 @@ from lambda_calc.core import alpha_equiv, get_env, all_beta_reductions, is_valid
 from lambda_calc.parser import parse
 from lambda_calc.ast import Var, Fun, App
 
+
 def test_get_env():
     f = parse('λx. λy.x (λz.wy)')
     #          ^f  ^g    ^h
@@ -61,26 +62,26 @@ def test_all_beta_reductions():
     # alpha renaming
     e = parse('(λf.λa.λb.fab)((ab)(cd))(λabcd.abcd)')
     reduc_type, reduced = next(all_beta_reductions(e))
-    assert(reduc_type == 'alpha')
+    assert (reduc_type == 'alpha')
     assert alpha_equiv(reduced, parse('(λf.λa.λb.fab)((ab)(cd))(λabcd.abcd)'))
 
     # alpha renaming nested
     e = parse('(λxab.abλab.x(ab)(λab.ab))(ab)')
     reduc_type, reduced = next(all_beta_reductions(e))
     reduc_type2, reduced2 = next(all_beta_reductions(reduced))
-    assert((reduc_type == 'alpha') & (reduc_type2 == 'beta'))
+    assert ((reduc_type == 'alpha') & (reduc_type2 == 'beta'))
     assert alpha_equiv(reduced, e)
 
-    #Beta Reductions now
+    # Beta Reductions now
     e = parse('(λcba.cba)c(λx.x)')
     reduc_type, reduced = next(all_beta_reductions(e))
     reduc_type2, reduced2 = next(all_beta_reductions(reduced))
-    assert((reduc_type == 'beta') & (reduc_type2 == 'beta'))
+    assert ((reduc_type == 'beta') & (reduc_type2 == 'beta'))
     assert alpha_equiv(reduced, parse('((λba.((cb)a))(λx.x))'))
     assert alpha_equiv(reduced2, parse('(λa.((c(λx.x))a))'))
     assert alpha_equiv(reduced2, parse('(λa.c(λx.x)a)'))
 
-    #test case
+    # test case
     e = parse('(λx.λy.λz.yzx)(λx.x)(λx.λy.yx)(λy.z)')
     reduc_type, reduced = next(all_beta_reductions(e))
     reduc_type2, reduced2 = next(all_beta_reductions(reduced))
@@ -93,40 +94,28 @@ def test_all_beta_reductions():
     e = parse('(λabc.cba)c(λx.x)')
     reduc_type, reduced = next(all_beta_reductions(e))
     reduc_type2, reduced2 = next(all_beta_reductions(reduced))
-    assert((reduc_type == 'beta') & (reduc_type2 == 'beta'))
-    assert alpha_equiv(reduced2,parse('λc.c(λx.x)c'))
+    assert ((reduc_type == 'beta') & (reduc_type2 == 'beta'))
+    assert alpha_equiv(reduced2, parse('λc.c(λx.x)c'))
 
     e = parse('(λab.a)(λcd.d)(λef.e)')
     reduc_type, reduced = next(all_beta_reductions(e))
     reduc_type2, reduced2 = next(all_beta_reductions(reduced))
-    assert((reduc_type == 'beta') & (reduc_type2 == 'beta'))
+    assert ((reduc_type == 'beta') & (reduc_type2 == 'beta'))
     assert alpha_equiv(reduced2, parse('λcd.d'))
 
-    #Testing support for y'
-    e =  parse("(λx'.x')(λz.yz)(z)")
+    # Testing support for y'
+    e = parse("(λx'.x')(λz.yz)(z)")
     reduc_type, reduced = next(all_beta_reductions(e))
     assert alpha_equiv(reduced, parse('((λz.(yz))z)'))
 
-    #Testing support for y'''
-    e =  parse("(λx'''.x''')(λz.yz)(z)")
+    # Testing support for y'''
+    e = parse("(λx'''.x''')(λz.yz)(z)")
     reduc_type, reduced = next(all_beta_reductions(e))
     assert alpha_equiv(reduced, parse('((λz.(yz))z)'))
 
-    #Testing support for y'
-    e =  parse("(λx.x)(λz'.yz')(z)")
+    # Testing support for y'
+    e = parse("(λx.x)(λz'.yz')(z)")
     reduc_type, reduced = next(all_beta_reductions(e))
     assert alpha_equiv(reduced, parse("((λz'.(yz'))z)"))
     reduc_type2, reduced2 = next(all_beta_reductions(reduced))
     assert alpha_equiv(reduced2, parse('yz'))
-
-    
-
-
-
-    
-
-
-
-    
-    
-

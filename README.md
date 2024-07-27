@@ -37,8 +37,11 @@ errors = check_candidate_str(candidate_str)
 **List of Errors:**
 + `Cannot parse initial lambda expression`: The lambda expression in `line 0` cannot be parsed
 +  `Line x could not be parsed`: The reduction in `line x` cannot be parsed
-+ `Line x is not a valid alpha reduction`: The reduction in `line x` is invalid and is not alpha equivalent to `line x-1`
-+ `Line x is not a valid beta reduction`: The reduction in `line x` is invalid and is not alpha equivalent to `line x-1`
++  `Line x: Invalid reduction type`: The reduction in `line x` does not start with `a->` or `b->`
++ `Line x: Alpha reduction is not valid`: The reduction in `line x` is not alpha equivalent to `line x-1`
++ `Line x: Alpha reduction not necessary`: The alpha reduction in `line x` is not needed
++ `Line x: Invalid beta reduction`: The reduction in `line x` is invalid and is not alpha equivalent to `line x-1`
++ `Last expression is not a simple expression`: The last line in the candidate string is not a simple expression
 
 
 

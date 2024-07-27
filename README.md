@@ -16,17 +16,17 @@ There are several files in `lambda_calc`:
     - Note that the parser allows for variables like `x`, ``x` `` and even ```x`` ```
     - So lambda expressions like : `λx'.x'`, `λx.x` and `λx''.x''` will be accepted by the parser
 + `core.py`: Contains the functions used for alpha reduction and beta reduction
-+ `wrapper.py`: Contains the function `check_candidate_str(candidatestring: str) -> List[str]` that can be called to parse a candidate string\
++ `wrapper.py`: Contains the function `check_candidate_str(candidate_str: str, initial_expr: str) -> List[str]` that can be called to parse a candidate string\
 
 The python code below shows how `check_candidate_str` can be used:
 ~~~python
 candidate_str = """
-(λx.x)(λz.yz)(z)\n
-b-> ((λz.yz)z)\n
-a-> ((λx.yx)z)\n
-b-> (y z)\n
+(λx.x)(λz.yz)(z)
+b-> ((λz.yz)z)
+a-> ((λx.yx)z)
+b-> (y z)
 """
-errors = check_candidate_str(candidate_str)
+errors = check_candidate_str(candidate_string = candidate_str, initial_expr = '(λx.x)(λz.yz)(z)')
 ~~~
 
 * `line 0`: Contains the lambda expression to parse: `(λx.x)(λz.yz)(z)`

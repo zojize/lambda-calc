@@ -33,7 +33,7 @@ def main():
                     expr = reductions[index]
                 except Exception:
                     expr = parse(user_input[2:])
-                reductions = list(all_beta_reductions(expr))
+                reductions = [r for _, r in all_beta_reductions(expr)]
                 if not reductions:
                     print('No reductions possible')
                 else:

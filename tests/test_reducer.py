@@ -6,49 +6,62 @@ from lambda_calc.ast import Var, Fun, App
 from lambda_calc.wrapper import check_candidate_str
 
 
-
 def test_reducer_success():
-    #Test1
-    candidate_str1 = """
-    (λx.x)(λz.yz)(z)\n
-    b-> ((λz.yz)z)\n
-    a-> ((λx.yx)z)\n
-    b-> (y z)\n
+    # Test1
+    candidate_str = """
+    (λx.x)(λz.yz)(z)
+    b-> ((λz.yz)z)
+    b-> (y z)
     """
-    errors1= check_candidate_str(candidate_str1)
-    assert(len(errors1) == 0)
+    errors = check_candidate_str(candidate_str, '(λx.x)(λz.yz)(z)')
+    assert not errors
 
-    #Test2 (Wrong alpha reduction)
-    candidate_str2 = """
-    (λx.x)(λz.yz)(z)\n
-    b-> ((λz.yz)z)\n
-    a-> ((λx.yx)f)\n
-    b-> (y z)\n
+    # Test2 (Wrong alpha reduction)
+    candidate_str = """
+    (λx.x)(λz.yz)(z)
+    b-> ((λz.yz)z)
+    a-> ((λx.yx)f)
+    b-> (y z)
     """
-    errors2 = check_candidate_str(candidate_str2)
-    assert('Line 2 is not a valid alpha reduction' in errors2)
+    errors = check_candidate_str(candidate_str, '(λx.x)(λz.yz)(z)')
+    assert errors == snapshot(["Line 3: Alpha reduction is not valid"])
 
-    #Test3 (Wrong beta reduction)
-    candidate_str3 = """
-    (λx.x)(λz.yz)(z)\n
-    b-> ((λz.cz)z)\n
-    a-> ((λx.yx)z)\n
-    b-> (y z)\n
+    # Test3 (Wrong beta reduction)
+    candidate_str = """
+    (λx.x)(λz.yz)(z)
+    b-> ((λz.cz)z)
+    b-> (y z)
     """
-    errors3 = check_candidate_str(candidate_str3)
-    assert('Line 1 is not a valid beta reduction' in errors3)
+    errors = check_candidate_str(candidate_str, '(λx.x)(λz.yz)(z)')
+    assert errors == snapshot(["Line 2: Invalid beta reduction"])
 
-
-    #Test4 (Invalid parsing: Missing brackets in alpha reduction for line2)
-    parse_str = '(λx.x)(λz.yz)(z)'
-    candidate_str4= """
-    (λx.x)(λz.yz)(z)\n
-    b-> ((λz.cz)z)\n
-    a-> (λx.yx)z)\n
-    b-> (y z)\n
+    # Test4 (Invalid parsing: Missing brackets in alpha reduction for line2)
+    candidate_str = """
+    (λx.x)(λy.y)(λz.yz)(z)
+    b-> (λy.y)(λz.yz)(z)
+    b-> ((λz.cz)z
+    b-> (y z)
     """
-    errors4= check_candidate_str(candidate_str4)
-    assert('Line 2 could not be parsed' in errors4)
+    errors = check_candidate_str(candidate_str, '(λx.x)(λy.y)(λz.yz)(z)')
+    assert errors == snapshot(["Line 3: Could not parse lambda expression"])
 
-if __name__ == "__main__":
-    test_reducer_success()
+    # Test5
+    candidate_str = """
+    (λx.x)(λz.yz)(z)
+    b-> ((λz.yz)z)
+    a-> ((λx.yx)z)
+    b-> (y z)
+    """
+    errors = check_candidate_str(candidate_str, '(λx.x)(λz.yz)(z)')
+    assert errors == snapshot(["Line 3: Alpha reduction not necessary"])
+
+    # Test6 (Adding unnecessary lines to a simple expression)
+    candidate_str = """
+    (λx.x)(λz.yz)(z)
+    b-> ((λz.yz)z)
+    a-> ((λx.yx)z)
+    b-> (y z)
+    b-> (y z)
+    """
+    errors = check_candidate_str(candidate_str, '(λx.x)(λz.yz)(z)')
+    assert errors == snapshot(["Line 3: Alpha reduction not necessary", "Line 5: Invalid beta reduction"])

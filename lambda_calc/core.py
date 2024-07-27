@@ -1,4 +1,4 @@
-from typing import Generator, TypedDict, TypeAlias
+from typing import Generator, Literal, TypeAlias, List
 from functools import reduce
 from .ast import Var, Fun, App, LambdaExpr
 import string
@@ -12,22 +12,18 @@ Env: TypeAlias = dict[int, tuple[Var, Fun | None]]
 
 def get_env(expr: LambdaExpr) -> Env:
     '''returns a mapping of variable ids to its bounding functions, in context of expr'''
-    env: Env = {}
-
-    def get_env_helper(expr: LambdaExpr, scope: dict[str, Fun]):
+    def get_env_helper(expr: LambdaExpr, scope: dict[str, Fun]) -> Env:
         match expr:
             case Var(name):
                 if name in scope:
-                    env[id(expr)] = (expr, scope[name])
+                    return {id(expr): (expr, scope[name])}
                 else:
-                    env[id(expr)] = (expr, None)
+                    return {id(expr): (expr, None)}
             case Fun(args, body):
-                get_env_helper(body, scope | {arg.name: expr for arg in args})
+                return get_env_helper(body, scope | {arg.name: expr for arg in args})
             case App(fun, arg):
-                get_env_helper(fun, scope)
-                get_env_helper(arg, scope)
-    get_env_helper(expr, {})
-    return env
+                return get_env_helper(fun, scope) | get_env_helper(arg, scope)
+    return get_env_helper(expr, {})
 
 
 def curry(expr: LambdaExpr) -> LambdaExpr:
@@ -86,11 +82,10 @@ def alpha_equiv(e1: LambdaExpr, e2: LambdaExpr) -> bool:
 
 
 def substitute(expr: LambdaExpr, to_replace: Var, replacement: LambdaExpr, fun: Fun, env: Env) -> LambdaExpr:
-    '''substitute a variable with another expression in the given scope, assuming scope populated'''
+    '''substitute a variable with another expression in the given env'''
     def substitute_helper(expr: LambdaExpr) -> LambdaExpr:
         match expr:
             case Var(name):
-                # return expr
                 if name != to_replace.name:
                     return expr
                 if env[id(expr)][1] is fun:
@@ -105,42 +100,49 @@ def substitute(expr: LambdaExpr, to_replace: Var, replacement: LambdaExpr, fun: 
     return substitute_helper(expr)
 
 
-def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
-    '''rename variables in the expression to avoid name conflicts with free variables'''
+def vars_need_renaming(expr: LambdaExpr, free_vars: set[Var], to_replace: Var, fun: Fun, env: Env) -> list[tuple[int, str]]:
+    '''returns a list of variables that need renaming to avoid name conflicts with free variables'''
     if not free_vars:
-        return expr
+        return []
 
-    def find_needs_renaming(expr: LambdaExpr, scope: dict[str, list[int]]) -> list[tuple[int, str]]:
+    def vars_need_renaming_helper(expr: LambdaExpr, scope: dict[str, list[int]]) -> list[tuple[int, str]]:
         match expr:
             case Var(name):
-                # is variable is free and needs renaming
-                if env[id(expr)][1] == None and expr in free_vars:
-                    return [(fun, name) for fun in scope.get(name, [])]
+                if name == to_replace.name and env[id(expr)][1] is fun:
+                    return [(fun, free.name) for free in free_vars for fun in scope.get(free.name, [])]
+                # if env[id(expr)][1] == None and expr in free_vars:
+                #     return [(fun, name) for fun in scope.get(name, [])]
                 return []
             case Fun(args, body):
-                return find_needs_renaming(body, scope |
-                                           {arg.name: scope.get(arg.name, []) + [id(expr)] for arg in args})
-            case App(fun, arg):
-                return find_needs_renaming(fun, scope) + find_needs_renaming(arg, scope)
-    needs_renaming = find_needs_renaming(expr, {})
-    #Get all chars from a to z and from a' to z'
-    available_names = iter(set(list(string.ascii_lowercase) + [ char + "'" for char in list(string.ascii_lowercase)]) - {var.name for (var, _) in env.values()})
-    
+                return vars_need_renaming_helper(body, scope |
+                                                 {arg.name: scope.get(arg.name, []) + [id(expr)] for arg in args})
+            case App(fun_, arg):
+                return vars_need_renaming_helper(fun_, scope) + vars_need_renaming_helper(arg, scope)
+    return vars_need_renaming_helper(expr, {})
+
+
+def alpha_rename(expr: LambdaExpr, vars_to_rename: list[tuple[int, str]], env: Env):
+    '''rename variables in the expression to avoid name conflicts with free variables'''
+
+    # Get all chars from a to z and from a' to z'
+    available_names = iter(set(list(string.ascii_lowercase) + [char + "'" for char in list(string.ascii_lowercase)]) - {var.name for (var, _) in env.values()})
+
     def get_new_name(): return next(available_names)
 
-    if not needs_renaming:
+    if not vars_to_rename:
         return expr
 
     def rename_helper(expr: LambdaExpr, rename_to: dict[str, str]) -> LambdaExpr:
         match expr:
             case Var(name):
+                # if not a free variable and needs renaming
                 if env[id(expr)][1] and name in rename_to:
                     return Var(rename_to[name])
                 return expr
             case Fun(args, body):
                 #! will error if name runs out
                 new_names = {
-                    arg.name: get_new_name() for arg in args if (id(expr), arg.name) in needs_renaming
+                    arg.name: get_new_name() for arg in args if (id(expr), arg.name) in vars_to_rename
                 }
                 # no new names also means no renaming needed
                 if not new_names:
@@ -152,34 +154,45 @@ def alpha_rename(expr: LambdaExpr, free_vars: set[Var], env: Env):
     return rename_helper(expr, {})
 
 
-def all_beta_reductions(expr: LambdaExpr) -> Generator[LambdaExpr, None, None]:
+def all_beta_reductions(expr: LambdaExpr) -> Generator[tuple[Literal["alpha"] | Literal["beta"], LambdaExpr], None, None]:
     env = get_env(expr)
 
     def all_beta_reductions_helper(expr: LambdaExpr):
         match expr:
             case Fun(args, body):
-                yield from ((Fun(args, body), free_vars) for body, free_vars in all_beta_reductions_helper(body))
+                yield from ((t, Fun(args, body)) for t, body in all_beta_reductions_helper(body))
             case App(Fun(args, body) as fun, arg):
                 to_replace, *tail = args
                 arg_env = get_env(arg)
                 arg_free_vars = {var for (var, env) in arg_env.values() if env is None}
-                if not tail:
-                    yield substitute(body, to_replace, arg, fun, env), arg_free_vars
+                vars_to_rename = vars_need_renaming(body, arg_free_vars, to_replace, fun, env)
+                if vars_to_rename:
+                    # alpha-reduction
+                    yield "alpha", App(Fun(args, alpha_rename(body, vars_to_rename, env)), arg)
+                elif tail:
+                    # beta-reduction
+                    yield "beta", Fun(tail, substitute(body, to_replace, arg, fun, env))
                 else:
-                    yield Fun(tail, substitute(body, to_replace, arg, fun, env)), arg_free_vars
-                yield from ((App(fun, arg), free_vars) for arg, free_vars in all_beta_reductions_helper(arg))
+                    # beta-reduction
+                    yield "beta", substitute(body, to_replace, arg, fun, env)
+                yield from ((t, App(fun, arg)) for t, arg in all_beta_reductions_helper(arg))
             case App(fun, arg):
-                yield from ((App(fun, arg), free_vars) for fun, free_vars in all_beta_reductions_helper(fun))
-                yield from ((App(fun, arg), free_vars) for arg, free_vars in all_beta_reductions_helper(arg))
+                yield from ((t, App(fun, arg)) for t, fun in all_beta_reductions_helper(fun))
+                yield from ((t, App(fun, arg)) for t, arg in all_beta_reductions_helper(arg))
             case _:
                 # no need to reduce variables
                 pass
-    yield from (alpha_rename(reduction, free_vars, env) for reduction, free_vars in all_beta_reductions_helper(expr))
+    yield from all_beta_reductions_helper(expr)
 
 
 def is_valid_reduction(expr: LambdaExpr, reduction: LambdaExpr) -> bool:
-    return any(alpha_equiv(reduction, reduced) for reduced in all_beta_reductions(expr))
+    return any(alpha_equiv(reduction, reduced) for _, reduced in all_beta_reductions(expr))
 
 
 def is_simple(expr: LambdaExpr) -> bool:
     return not any(True for _ in all_beta_reductions(expr))
+
+
+def return_reducs_only(beta_reduc: Generator) -> List[LambdaExpr]:
+    reduc_list = [reduc for (_, reduc) in beta_reduc]
+    return reduc_list

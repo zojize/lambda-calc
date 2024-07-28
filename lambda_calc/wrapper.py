@@ -1,8 +1,9 @@
 from .core import alpha_equiv, all_beta_reductions, is_simple
 from .parser import parse
+from typing import List
 
 
-def check_candidate_str(candidate_string: str, initial_expr: str):
+def check_candidate_str(candidate_string: str, initial_expr: str) -> List[str]:
     '''Takes in the candidate string and returns a list of all possible errors'''
     lines = candidate_string.split('\n')
 
